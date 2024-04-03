@@ -1,0 +1,10 @@
+### Obtained with pipreqs
+matplotlib
+networkit
+networkx
+numba==0.56
+numpy
+pqdict
+scikit_learn
+scipy
+tqdm

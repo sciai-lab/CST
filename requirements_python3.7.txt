@@ -1,0 +1,11 @@
+### Obtained with pipreqs
+matplotlib==3.5
+networkit==10.1
+networkx==2.6
+numba==0.56.0
+numpy==1.21
+pqdict==1.2.0
+scikit_learn==1.0.0
+### scipy==1.9.3
+scipy==1.7.3
+tqdm==4.65.0
