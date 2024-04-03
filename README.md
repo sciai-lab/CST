@@ -11,7 +11,7 @@ problem over the edge lengths, with specific instances including the minimum spa
 tree. The minimization problem weighs the length of the edges by their tree edge-centralities, which are regulated 
 by a parameter $\alpha$. Formally, the CST is defined as the solution to the following optimization problem:
 
-$$\underset{\tree}{\arg \min}\sum_{(i,j)\in E_{T}}\big(m_{ij}(1-m_{ij})\big)^{\alpha}||x_i-x_j||$$
+$$\underset{T}{\arg \min}\sum_{(i,j)\in E_{T}}\big(m_{ij}(1-m_{ij})\big)^{\alpha}||x_i-x_j||$$
 
 where $m_{ij}$ and $(1-m_{ij})$ are the normalized cardinalities of the components resulting from the removal of the edge 
 $e=(i,j)$ from $T$. the product $m_e(1-m_e)$ is proportional to the "edge betweeness centrality" of $e$ in $T$.
@@ -68,12 +68,12 @@ To approximate the solution, we propose a heuristic algorithm called mSTreg, whi
 
 
 ## Iterations of the mSTreg algorithm
-| α = 0.25 | α = 0.50 |
-|--------------|--------------|
+| $\alpha=0.25$  | $\alpha=0.50$                                                                  |
+|--------------|--------------------------------------------------------------------------------|
 | ![Figure 1](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.25/animation.gif) | ![Figure 2](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.50/animation.gif) |
 
-| α = 0.75 | α = 1.00 |
-|--------------|--------------|
+| $\alpha=0.75$                                                                  | $\alpha=1.00$                                                                  |
+|--------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | ![Figure 3](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.75/animation.gif) | ![Figure 4](./Figures/GIFS/mSTREG_iterations/uniform/alpha=1.00/animation.gif) |
 
 
