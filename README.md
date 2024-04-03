@@ -40,15 +40,15 @@ the tree and the data fidelity, where the latter is intuitively related to conne
 
 |                               CST                               |                               BCST                                |
 |:---------------------------------------------------------------:|:-----------------------------------------------------------------:|
-|                          $\alpha=0.00$                          |                           $\alpha=0.00$                           |
+|                             α=0.00                              |                              α=0.00                               |
 | ![Figure 1](./Figures/GIFS/BOUNCING/uniform/CST_alpha_0.00.gif) | ![Figure 2](./Figures/GIFS/BOUNCING/uniform/BCST_alpha_0.00.gif)  |
-|                          $\alpha=0.25$                          |                           $\alpha=0.25$                           |
+|                             α=0.25                              |                              α=0.25                               |
 | ![Figure 3](./Figures/GIFS/BOUNCING/uniform/CST_alpha_0.25.gif) | ![Figure 4](./Figures/GIFS/BOUNCING/uniform/BCST_alpha_0.25.gif)  |
-|                          $\alpha=0.50$                          |                           $\alpha=0.50$                           |
+|                             α=0.50                              |                              α=0.50                               |
 | ![Figure 5](./Figures/GIFS/BOUNCING/uniform/CST_alpha_0.50.gif) | ![Figure 6](./Figures/GIFS/BOUNCING/uniform/BCST_alpha_0.50.gif)  |
-|                          $\alpha=0.75$                          |                           $\alpha=0.75$                           |
+|                             α=0.75                              |                              α=0.75                               |
 | ![Figure 7](./Figures/GIFS/BOUNCING/uniform/CST_alpha_0.75.gif) | ![Figure 8](./Figures/GIFS/BOUNCING/uniform/BCST_alpha_0.75.gif)  |
-|                          $\alpha=1.00$                          |                           $\alpha=1.00$                           |
+|                             α=1.00                              |                              α=1.00                               |
 | ![Figure 9](./Figures/GIFS/BOUNCING/uniform/CST_alpha_1.00.gif) | ![Figure 10](./Figures/GIFS/BOUNCING/uniform/BCST_alpha_1.00.gif) |
 
 ## mSTreg algorithm
@@ -68,12 +68,12 @@ To approximate the solution, we propose a heuristic algorithm called mSTreg, whi
 
 
 ## Iterations of the mSTreg algorithm
-| $\alpha=0.25$  | $\alpha=0.50$                                                                  |
-|--------------|--------------------------------------------------------------------------------|
+| α = 0.25 | α = 0.50 |
+|--------------|--------------|
 | ![Figure 1](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.25/animation.gif) | ![Figure 2](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.50/animation.gif) |
 
-| $\alpha=0.75$                                                                  | $\alpha=1.00$                                                                  |
-|--------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| α = 0.75 | α = 1.00 |
+|--------------|--------------|
 | ![Figure 3](./Figures/GIFS/mSTREG_iterations/uniform/alpha=0.75/animation.gif) | ![Figure 4](./Figures/GIFS/mSTREG_iterations/uniform/alpha=1.00/animation.gif) |
 
 
