@@ -3,6 +3,43 @@
 This repository includes the code of the experiments conducted in the paper "The Central Spanning Tree" by Enrique 
 Fita Sanmartin, Christoph Schnörr and Fred A. Hamprecht. The paper is available at 
 
+## Usage
+The code is written in Python 3.8. To install the required packages, run the following command:
+#### Install the required packages
+```bash
+pip install -r requirements.txt
+```
+
+#### Example
+```
+import numpy as np
+
+#if Not installed
+from lib.CST.T_datacls.T_datacls import T_data
+
+# if installed 
+# from CST.T_datacls.T_datacls import T_data
+
+
+# Generate random data
+n = 100
+np.random.seed(0)
+P = np.random.rand(n, 2)
+
+# Create the T_data object
+tdata = T_data(P)
+
+# Compute the CST and BCST
+alpha=0.5
+
+tdata.compute_BCST(alpha=alpha, maxiter_mSTreg=10, return_topo_CST=True,verbose=False)
+
+print(tdata.trees['CST_%0.2f' % alpha])
+print(tdata.trees['BCST_%0.2f' % alpha])
+```
+
+
+## Definition
 The Central Spanning Tree (CST) is a family of robust spanning trees embedded in Euclidean space, whose geometrical 
 structure is resilient against perturbations such as noise on the coordinates of the nodes. Two variants of the 
 problem are explored: one permitting the inclusion of Steiner points (referred to as branched central spanning tree 
