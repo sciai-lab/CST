@@ -1,7 +1,7 @@
 # Central Spanning Tree
 
 This repository includes the code of the experiments conducted in the paper "The Central Spanning Tree" by Enrique 
-Fita Sanmartin, Christoph Schnörr and Fred A. Hamprecht. The paper is available at 
+Fita Sanmartin, Christoph Schnörr and Fred A. Hamprecht. The paper is available [here](https://arxiv.org/pdf/2404.06447.pdf).
 
 ## Usage
 The code is written in Python 3.8. To install the required packages, run the following command:
