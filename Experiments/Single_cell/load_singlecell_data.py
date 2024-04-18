@@ -135,7 +135,6 @@ def load_setty():
         with h5py.File(filepath_preprocessed, "w") as f:
             f.create_dataset('X_PCA50', data=X_PCA)
             f.create_dataset('X_TSNE', data=X_TSNE)
-            f.create_dataset('X_RAW', data=X_RAW)
             f['labels'] = labels.astype('S')
             f['colors'] =colors.astype('S')
 
@@ -143,7 +142,6 @@ def load_setty():
     with h5py.File(filepath_preprocessed, 'r') as f:
         print(f.keys())
         X_PCA = np.array(f['X_PCA50'])
-        X_RAW = np.array(f['X_RAW'])
         X_TSNE = np.array(f['X_TSNE'])
         labels = np.array(f['labels']).astype(str)
         colors=np.array(f['colors']).astype(str)
@@ -155,7 +153,7 @@ def download_Settydata(filepath='setty.h5ad'):
         https://data.humancellatlas.org/explore/projects/091cf39b-01bc-42e5-9437-f419a66c8a45/project-matrices
     '''
 
-    url='https://storage.googleapis.com/datarepo-4ef3f5a3-bucket/0e5e329e-2709-4ceb-bfe3-97d23a652ac0/3428f967-3376-4051-b6f7-8dd84580ca5b/human_cd34_bm_rep1.h5ad?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=datarepo-jade-api%40terra-datarepo-production.iam.gserviceaccount.com%2F20240418%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240418T090949Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&requestedBy=azul-ucsc-0-public-prod%40platform-hca-prod.iam.gserviceaccount.com&userProject=datarepo-1dbff5cd&X-Goog-Signature=ab645a8f0055d5b002bf17e363951e19201b8b06a6ecb840ca52e26a227e586cb6355f06c8ed2cf0a43930ff47560c832221db5234eff689f495a21cf090960aa51fa795740f5c64bf205ce677b02ab2775c21964cc025353f34cf43f9c93fd52f2c5196bca29c83913b3857e4773541539bbabb66cf90932a665571fe14d325f225b155ba67f417f2809a0da6ad19f4c71f3c587af470451e243694b30755d4f93d184e1e6615f741d6239050f85d505732cc3f35ca0908de42daee1baadf566ad6a045319fc1a1063a46f58714211db6613725ee8f3990c3d678002900cd356c156465b5bebadb278bed89bf704406e65d36ad07359a875a7b9cd4ffb6513d'
+    url='https://storage.googleapis.com/datarepo-4ef3f5a3-bucket/0e5e329e-2709-4ceb-bfe3-97d23a652ac0/3428f967-3376-4051-b6f7-8dd84580ca5b/human_cd34_bm_rep1.h5ad?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=datarepo-jade-api%40terra-datarepo-production.iam.gserviceaccount.com%2F20240418%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240418T124755Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&requestedBy=azul-ucsc-0-public-prod%40platform-hca-prod.iam.gserviceaccount.com&userProject=datarepo-1dbff5cd&X-Goog-Signature=c4d696a83e9481edfab1cd56637b9a98ded6b055d851051f5ec36fb78b50dbe52798748a714aca248a4ae050c35a5efbb978df239ac75033689fe5fc80f216af1ffa501e02103291bc35a1ccdc29286de7e43387d1b98d8fe724d211ed3b06417af8f0e25433409204bbbcb984cf6280dcdd4f656b12dc86bf84a34be3998df9ffe30ac5965c3f68eba8dd9f7404999e7c91f46b2b17db8697331270288620129690d999e4f2353552d207afc442ce6035f16b434c19e6062595af1e05d1191ea1c3c33c727161afee553ace1df5e509a482081ebaa2689afa0f37516205833c430ae9fd30cb5925766fd78defe01767effd82b0fb0573027ce947d2ea47b875'
 
     # Create the data folder if it doesn't exist
     directory_path, filename = os.path.split(filepath)

@@ -179,7 +179,7 @@ class Tree_SP(Tree):
 		opt_lib.calculate_EW_BCST(self.num_terminals,self.adj_flows, self.adj, demands, 1, 1)
 		
 		#update widths
-		self.widths = spp.triu(adj_to_adj_sparse(adj, flows=adj_flows)).data
+		self.widths = spp.triu(adj_to_adj_sparse(self.adj, flows=self.adj_flows)).data
 		self.widths /= np.max(self.widths)
 		
 		#update coords_vis
