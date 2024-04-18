@@ -42,7 +42,7 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
                  order_criterium='closestterminals', merging_criterium='tryall',
                  criterium_BP_position_update='median',
                  Compute_CST_each_iter=True, demands=None, init_BP_coords=None, verbose=False,
-                 mST_fromknn=True, ori_input_graph=None, policy_constraint='shortest_path',beta=1,
+                 mST_fromknn=True, beta=1,
                  factor_terminal=1):
     """
        Compute the BCST  given a topology and terminal coordinates.
@@ -67,10 +67,10 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
            param: demands (None or np.ndarray): The demand matrix for CST optimization. Default is None.
            param: init_BP_coords (None or np.ndarray): The initial branch point coordinates for CST optimization. Default is None.
            param: mST_fromknn (bool): Whether to approximate the mST from a kNN graph. Default is True.
-           param: ori_input_graph: Adjacency sparse matrix over terminals with the entries representing the euclidean distance
-            between terminal nodes. If given it constraints the CST solutions to be spanning trees of this graph. In the
-             BCST case, it constrains the full tree topologies to be derived from spanning trees of the original graph.
-           param: policy_constraint (str): The mode of the constraint if ori_input_graph is give. Default is 'shortest_path'.
+           param: beta (float): parameter to interpolate linearly between the centralities of the edges and 1:
+           (1-beta)+beta*(m_ij*(1-m_ij))**alpha. Default is 1. DO NOT CHANGE. Only for testing purposes. Spoiler: it does not work,
+           with beta!=1.
+
 
        Returns:
            If return_CST is False:
@@ -107,12 +107,12 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
             best_topo_CST = removeBP(T=T_dict,edge_flows=flows_dict,num_terminals=num_terminals, coords=filtered_coords,
                                      order_criterium=order_criterium, merging_criterium=merging_criterium,
                                      criterium_BP_position_update=criterium_BP_position_update, alpha=alpha,
-                                     ori_input_graph=ori_input_graph)  # removes BP from solution-> tree on original coordinates
+                                     )  # removes BP from solution-> tree on original coordinates
         else:
             best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
                                        order_criterium=order_criterium, merging_criterium=merging_criterium,
                                        criterium_BP_position_update=criterium_BP_position_update, alpha=alpha,
-                                     ori_input_graph=ori_input_graph)  # removes BP from solution-> tree on original coordinates
+                                     )  # removes BP from solution-> tree on original coordinates
 
         #compute cost of CST
         best_cost_CST = Wiener_index(best_topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
@@ -129,8 +129,7 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
             break
         improv = False
         #apply mST regularization
-        newadj = topo_mST_reguralization(coords, adj=topo_BCST, max_freq=maxfreq_mSTreg, mST_fromknn=mST_fromknn,
-                                         ori_input_graph=ori_input_graph, policy_constraint=policy_constraint)
+        newadj = topo_mST_reguralization(coords, adj=topo_BCST, max_freq=maxfreq_mSTreg, mST_fromknn=mST_fromknn)
         topo_BCST, cost_BCST, coords, EW, _ = fast_optimize(newadj, coords_terminals=coords_terminals, al=alpha,
                                                                   demands=demands, init_BP_coords=init_BP_coords, EW=None,
                                                             beta=beta,factor_terminal=factor_terminal)
@@ -149,12 +148,12 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
                                          coords=filtered_coords,
                                       order_criterium=order_criterium, merging_criterium=merging_criterium,
                                       criterium_BP_position_update=criterium_BP_position_update,
-                                    alpha=alpha,ori_input_graph=ori_input_graph,policy_constraint=policy_constraint)
+                                    alpha=alpha)
             else:
                 topo_CST = removeBP(adj_to_adj_sparse(topo_BCST, flows=EW), coords=coords,
                                       order_criterium=order_criterium, merging_criterium=merging_criterium,
                                       criterium_BP_position_update=criterium_BP_position_update,
-                                    alpha=alpha,ori_input_graph=ori_input_graph,policy_constraint=policy_constraint)  # removes BP from solution-> tree on original coordinates
+                                    alpha=alpha)  # removes BP from solution-> tree on original coordinates
             #compute cost of CST
             cost_CST = Wiener_index(topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
             if best_cost_CST > cost_CST:
@@ -181,12 +180,12 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
                 best_topo_CST = removeBP(T=T_dict,edge_flows=flows_dict,num_terminals=num_terminals, coords=filtered_coords,
                                          order_criterium=order_criterium, merging_criterium=merging_criterium,
                                          criterium_BP_position_update=criterium_BP_position_update,
-                                         alpha=alpha, ori_input_graph=ori_input_graph, policy_constraint=policy_constraint)
+                                         alpha=alpha)
             else:
                 best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
                                        order_criterium=order_criterium, merging_criterium=merging_criterium,
                                        criterium_BP_position_update=criterium_BP_position_update,
-                                     alpha=alpha,ori_input_graph=ori_input_graph,policy_constraint=policy_constraint)  # removes BP from solution-> tree on original coordinates
+                                     alpha=alpha)  # removes BP from solution-> tree on original coordinates
             # compute cost of CST
             best_cost_CST = Wiener_index(best_topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
 
@@ -199,78 +198,6 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
 #%%
 from numba import njit, prange
 
-# @njit()
-# def process_adj(adj, P, threshold, max_freq, min_length):
-#     """
-#     Process the adjacency matrix and perform filtering and sampling of coordinates.
-#
-#     Args:
-#         adj (numpy.ndarray or None): Adjacency matrix encoding neighboring information.
-#         P (numpy.ndarray): Input coordinates.
-#         threshold (float): Threshold for determining repeated coordinates.
-#         max_freq (int): Maximum frequency for sampling coordinates.
-#
-#     Returns:
-#         numpy.ndarray: Processed coordinates.
-#         int: Index of the sampling coordinate.
-#
-#     """
-#     n = len(P) // 2 + 1
-#     upper_bound_num_samples = (max_freq - 2) * len(P)
-#     sampling_coords_combined_size = int(0.5 * upper_bound_num_samples)
-#     partial_sampling_coords = np.empty((sampling_coords_combined_size, P.shape[1]))
-#     sampling_coords_ls=[]
-#     partial_sampling_coords_index = 0
-#     num_sampled_coords=0
-#     sub_idx_sampled = -1
-#     if adj is not None and max_freq > 2:
-#         for i in prange(len(adj)):
-#             bp = n + i
-#             for j in adj[i]:
-#                 if bp < j:
-#                     continue
-#                 dist = np.linalg.norm(P[bp] - P[j])
-#                 freq = min(int(np.ceil(dist / min_length)) + 1, max_freq)
-#                 if freq > 2:
-#                     # Pre-allocate array for sampling coordinates
-#                     for k in range(1, freq - 1):
-#                         sub_idx_sampled+=1
-#                         partial_sampling_coords[sub_idx_sampled] = P[bp] + (k / (freq - 1)) * (P[j] - P[bp])
-#                         num_sampled_coords+=1
-#
-#                         # Check if sampling_coords_combined is full
-#                         if sub_idx_sampled+1 >= sampling_coords_combined_size:
-#                             # Append the current array to the list and create a new array
-#                             print(partial_sampling_coords.shape)
-#
-#                             partial_sampling_coords_index += 1
-#                             sampling_coords_ls.append(partial_sampling_coords)
-#                             sampling_coords_combined_size = min(int(0.3 * upper_bound_num_samples),upper_bound_num_samples- num_sampled_coords)
-#                             partial_sampling_coords = np.empty((sampling_coords_combined_size, P.shape[1]))
-#                             sub_idx_sampled = -1
-#                             print('eo')
-#
-#
-#                     # Update sampling_coords_combined and index
-#                     if sub_idx_sampled>=0:
-#                         sampling_coords_ls.append(partial_sampling_coords[:sub_idx_sampled+1])
-#
-#         non_repeated = (compute_pairwise_distances(P[:n], P[n:]) < threshold).sum(0) == 0
-#
-#         # Combine the arrays into a single numpy array
-#         sampling_coords_combined = np.empty((num_sampled_coords, P.shape[1]))
-#         start_index = 0
-#         for idx in range(len(sampling_coords_ls)):
-#             sampling_coord = sampling_coords_ls[idx]
-#             end_index = start_index + len(sampling_coord)
-#             sampling_coords_combined[start_index:end_index] = sampling_coord
-#             start_index = end_index
-#
-#     else:
-#         non_repeated = (compute_pairwise_distances(P[:n], P[n:]) < threshold).sum(0) == 0
-#         sampling_coords_combined = np.empty((0, P.shape[1]))  # Initialize as empty NumPy array
-#
-#     return non_repeated, sampling_coords_combined
 #
 @njit()
 def process_adj(adj, coords, max_freq, min_length,repeated_idxs=None):
@@ -541,7 +468,7 @@ def filter_and_sample_coords_nojit(adj, coords, threshold, max_freq):
 
 
 def topo_mST_reguralization(coords, threshold=1e-5, adj=None, max_freq=10,
-                            jit=True, mST_fromknn=True, ori_input_graph=None, policy_constraint=None):
+                            jit=True, mST_fromknn=True):
     '''
     Given the (branching points) BP and the terminal coordinates it computes the mST over these points. From this tree
     it computes a new topology.
@@ -560,8 +487,6 @@ def topo_mST_reguralization(coords, threshold=1e-5, adj=None, max_freq=10,
     :param jit: if True uses numba to speed up the computation
     :param mST_fromknn: if True computes the mST from the knn graph. This is faster but may lead to different results
     than computing the mST from the distance matrix
-    :param ori_input_graph: Adjacency sparse matrix with the entries representing the euclidean distance. If given it
-     constraints the full tree topologies to be derived from spanning trees of the original graph.
     :return:
     '''
 
@@ -598,8 +523,7 @@ def topo_mST_reguralization(coords, threshold=1e-5, adj=None, max_freq=10,
     mST = sp.csgraph.minimum_spanning_tree(A)
     mST += mST.T
 
-    if ori_input_graph is not None and policy_constraint== 'recursive':
-        mST=constrain2edge_index(mST,num_terminals=n,ori_input_graph=ori_input_graph)
+
 
     newadj = update_topoBP2binarytopoBP(mST, n)
     return newadj

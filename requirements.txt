@@ -2,7 +2,7 @@
 matplotlib
 networkit
 networkx
-numba==0.56
+numba
 numpy
 pqdict
 scikit_learn

@@ -6,10 +6,10 @@ from .utilities import plot_graph
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from .utilities.graphtools import ensure_connected_knn_graph
+from .utilities.graphtools import ensure_connected_knn_graph,Wiener_index
 
 from ..methods.mSTreg.heuristics import compute_BCST,sparsemat2fulltopoadj
-from ..methods.mSTreg.topology.prior_topology import random_bin_tree,incremental_star,sp_to_adj
+from ..methods.mSTreg.topology.prior_topology import random_bin_tree,incremental_star,sp_to_adj,karger_init
 from ..methods.mSTreg.topology import topology as FullTopology_cls
 
 from functools import wraps
@@ -139,7 +139,7 @@ class T_data():
                      order_criterium = 'closest', merging_criterium = 'tryall',
                      criterium_BP_position_update = 'median', compute_CST_each_iter=True,
                      mST_fromknn=True,filter_BP_from_solution=True,threshold_filter_collapse=1e-5,
-                     ori_input_graph=None,beta=1,factor_terminal=1,karger_graph=None,karger_temperature=1):
+                     beta=1,factor_terminal=1,karger_graph=None,karger_temperature=1):
         '''
 		Compute the BCST (Branched Central Spanning Tree) and CST (Central Spanning Tree) for a given alpha.
 
@@ -204,16 +204,13 @@ class T_data():
             # If init_topo is a string, compute the initial topology based on the specified method ('mST' or 'random')
             self.logger.info("Computing initial topology BCST %s" %init_topo)
             if init_topo =='mST':
-                if ori_input_graph is not None:
-                    init_topo = spp.csgraph.minimum_spanning_tree(ori_input_graph)
-                    init_topo = init_topo.maximum(init_topo.T)
-                else:
-                    if not 'mST' in self.trees.keys():
-                        self.minimum_spanning_tree()
-                    if return_topo_CST:
-                        init_topo_CST = self.trees['mST'].T.copy()
-                        init_CST_cost = self.trees['mST'].get_Wiener_index(alpha=alpha)
-                    init_topo=self.trees['mST'].T
+                # Compute the minimum spanning tree (mST) as the initial topology
+                if not 'mST' in self.trees.keys():
+                    self.minimum_spanning_tree()
+                if return_topo_CST:
+                    init_topo_CST = self.trees['mST'].T.copy()
+                    init_CST_cost = self.trees['mST'].get_Wiener_index(alpha=alpha)
+                init_topo=self.trees['mST'].T
                 init_topo = sparsemat2fulltopoadj(init_topo, coords=self.X)
             elif init_topo=='random':
                 #returns adj
@@ -281,9 +278,9 @@ class T_data():
                                                                                  criterium_BP_position_update=criterium_BP_position_update,
                                                                                  Compute_CST_each_iter=compute_CST_each_iter, demands=demands,
                                                                                  verbose=self.verbose,
-                                                                                 mST_fromknn=mST_fromknn,ori_input_graph=ori_input_graph,
+                                                                                 mST_fromknn=mST_fromknn,
                                                                                            beta=beta,
-                                                                                           factor_terminal=factor_terminal)
+                                                                               factor_terminal=factor_terminal)
             # Store CST topology and related information
             if init_CST_cost<CST_cost*scale:
                 self.trees[CST_txt] = Tree(init_topo_CST.tocsr(), coords=None, widths=None, coords_vis=self.X_vis,
@@ -303,9 +300,9 @@ class T_data():
                                                                       maxfreq_mSTreg=maxfreq_mSTreg,
                                                                       return_CST=False,demands=demands,
                                                                       verbose=self.verbose,
-                                                                       mST_fromknn=mST_fromknn,ori_input_graph=ori_input_graph,
+                                                                       mST_fromknn=mST_fromknn,
                                                                        beta=beta,
-                                                                       factor_terminal=factor_terminal,square_norm=square_norm)
+                                                                       factor_terminal=factor_terminal)
 
         # Store BCST topology and related information
         self.trees[BCST_txt]=Tree_SP(adj=BCST_topo.adj,adj_flows=BCST_EW,coords=BCST_coords_*scale,

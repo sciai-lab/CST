@@ -42,10 +42,7 @@ def load_requirements(filename):
 
 #check python version
 import sys
-if (3, 7)<=sys.version_info <= (3, 8):
-    requirements_file='requirements_python3.7.txt'
-elif (3, 8)<=sys.version_info <= (3, 9):
-    requirements_file= 'requirements_python3.8.txt'
+
 requirements_file='requirements.txt'
 
 print(requirements_file)

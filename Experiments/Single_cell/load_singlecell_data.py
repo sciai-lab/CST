@@ -1,21 +1,30 @@
 import numpy as np
 import requests
-import scanpy as sc
+
 import os
 import h5py
 
-import scvelo as scv
-
-sc.settings.verbosity = 3  # verbosity: errors (0), warnings (1), info (2), hints (3)
-sc.logging.print_versions()
-sc.settings.set_figure_params(dpi=80, frameon=False, figsize=(3, 3), facecolor='white')
 file_path = os.path.abspath(__file__)
 # Extract the directory path
 directory_current_file = os.path.dirname(file_path)
 data_folder = os.path.join(directory_current_file, '../..', 'Data','single_cell_data')
 os.makedirs(data_folder, exist_ok=True)
 
-sc.settings.datasetdir=data_folder
+try :
+    #use scanpy to download and preprocess the data
+    import scanpy as sc
+    
+    sc.settings.verbosity = 3  # verbosity: errors (0), warnings (1), info (2), hints (3)
+    sc.logging.print_versions()
+    sc.settings.set_figure_params(dpi=80, frameon=False, figsize=(3, 3), facecolor='white')
+    sc.settings.datasetdir=data_folder
+    
+except ImportError:
+    print("scanpy not installed. If data is already downloaded and preprocessed, you can ignore this message")
+    pass
+
+
+
 
 def load_paul15():
     filename_preprocessed = 'paul15_preprocessed.h5'
@@ -23,7 +32,6 @@ def load_paul15():
     #check if file exists
     if not os.path.exists(filepath_preprocessed):
         adata = sc.datasets.paul15()
-        X_RAW=adata.X.copy()
         print('preprocessing data')
         preprocess_paul15(adata)
 
@@ -35,16 +43,16 @@ def load_paul15():
         with h5py.File(filepath_preprocessed, "w") as f:
             f.create_dataset('X_PCA50', data=X_PCA)
             f.create_dataset('X_PAGA', data=X_PAGA)
-            f.create_dataset('X_RAW', data=X_RAW)
             f['labels'] = labels.astype('S')
         print('Saved %s in %s' % (filename_preprocessed, data_folder))
     with h5py.File(filepath_preprocessed, 'r') as f:
         print(f.keys())
         X_PCA = np.array(f['X_PCA50'])
-        X_RAW = np.array(f['X_RAW'])
         X_PAGA = np.array(f['X_PAGA'])
         labels = np.array(f['labels']).astype(str)
-    return X_RAW,X_PCA,X_PAGA,labels
+    return X_PCA,X_PAGA,labels
+
+
 
 def preprocess_paul15(adata):
     adata.X = adata.X.astype('float64')
@@ -81,8 +89,6 @@ def preprocess_paul15(adata):
     return adata
 
 
-
-
 def load_setty():
 
     filename_preprocessed = 'setty_preprocessed.h5'
@@ -92,9 +98,11 @@ def load_setty():
     if not os.path.exists(filepath_preprocessed):
         filename = 'setty.h5ad'
         filepath = os.path.join(data_folder, filename)
+        print(filepath)
         if not os.path.exists(filepath):
             print("Downloading Setty data")
             download_Settydata(filepath)
+        
         load_ad=sc.read(filepath)
 
         adata = sc.AnnData(load_ad.raw.X.copy())
@@ -143,10 +151,11 @@ def load_setty():
 
 def download_Settydata(filepath='setty.h5ad'):
     '''
+        Download human_cd34_bm_rep1.h5ad from
         https://data.humancellatlas.org/explore/projects/091cf39b-01bc-42e5-9437-f419a66c8a45/project-matrices
     '''
 
-    url='https://storage.googleapis.com/datarepo-4ef3f5a3-bucket/0e5e329e-2709-4ceb-bfe3-97d23a652ac0/3428f967-3376-4051-b6f7-8dd84580ca5b/human_cd34_bm_rep1.h5ad?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=datarepo-jade-api%40terra-datarepo-production.iam.gserviceaccount.com%2F20231101%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20231101T122535Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&requestedBy=azul-ucsc-0-public-prod%40platform-hca-prod.iam.gserviceaccount.com&userProject=datarepo-1dbff5cd&X-Goog-Signature=239d77c93c65ae88471ea1e7a7023a6af8afdd0bc42fc88251ef6001627d18d836dd064b80d9b9e65bf762db1aeabec96c50c5d030cd8ea47d93acf9f45a29075d783b49f2e99f3c6c89e4ad4f42e3257d6aadb01ca328292fe8238556b2f0d44b48b1fb977716e5a8ea7de53379b9990ef82f5d6e60cba67d67ba61452774a2edc2898e7aca968fe75792e4f38913cdc1076f01428953c5e983ea588c9040edd273140f571db2b5110443f2a13ea475e591a0d46d213dcbe0fcdf2da327d620355687d05331b1bdee10cff55652bcadee31ba20318069b512a727c0878a081b07811b47beae7a11fb9e034835bfe04c81ad223ffe8d54e0f19bc1c5f9aa5920'
+    url='https://storage.googleapis.com/datarepo-4ef3f5a3-bucket/0e5e329e-2709-4ceb-bfe3-97d23a652ac0/3428f967-3376-4051-b6f7-8dd84580ca5b/human_cd34_bm_rep1.h5ad?X-Goog-Algorithm=GOOG4-RSA-SHA256&X-Goog-Credential=datarepo-jade-api%40terra-datarepo-production.iam.gserviceaccount.com%2F20240418%2Fauto%2Fstorage%2Fgoog4_request&X-Goog-Date=20240418T090949Z&X-Goog-Expires=900&X-Goog-SignedHeaders=host&requestedBy=azul-ucsc-0-public-prod%40platform-hca-prod.iam.gserviceaccount.com&userProject=datarepo-1dbff5cd&X-Goog-Signature=ab645a8f0055d5b002bf17e363951e19201b8b06a6ecb840ca52e26a227e586cb6355f06c8ed2cf0a43930ff47560c832221db5234eff689f495a21cf090960aa51fa795740f5c64bf205ce677b02ab2775c21964cc025353f34cf43f9c93fd52f2c5196bca29c83913b3857e4773541539bbabb66cf90932a665571fe14d325f225b155ba67f417f2809a0da6ad19f4c71f3c587af470451e243694b30755d4f93d184e1e6615f741d6239050f85d505732cc3f35ca0908de42daee1baadf566ad6a045319fc1a1063a46f58714211db6613725ee8f3990c3d678002900cd356c156465b5bebadb278bed89bf704406e65d36ad07359a875a7b9cd4ffb6513d'
 
     # Create the data folder if it doesn't exist
     directory_path, filename = os.path.split(filepath)

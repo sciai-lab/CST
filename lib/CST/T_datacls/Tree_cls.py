@@ -202,7 +202,7 @@ class Tree_SP(Tree):
 		txt2print += 'adj_flows: %ix%i \n' % self.adj_flows.shape
 		
 		if self.coords is not None:
-			txt2print += 'P: %ix%i \n' % self.coords.shape
+			txt2print += 'coords: %ix%i \n' % self.coords.shape
 		if hasattr(self, 'coords_vis'):
 			txt2print += 'coords_vis: %ix%i \n' % self.coords_vis.shape
 		if self.widths is not None:

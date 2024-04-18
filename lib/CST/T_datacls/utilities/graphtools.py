@@ -14,8 +14,24 @@ except:
 from sklearn.neighbors import kneighbors_graph
 from scipy.sparse.csgraph import connected_components
 
-# from pynndescent import NNDescent
-# import faiss
+
+
+# MAKE COMPATIBLE WITH VARIOUS NETWORKX VERSIONS
+import importlib
+# Determine the function names based on the NetworkX version
+nx_version = tuple(map(int, nx.__version__.split('.')))
+if nx_version >= (2, 7):
+    from_sparse_array = 'from_scipy_sparse_array'
+    to_sparse_array = 'to_scipy_sparse_array'
+else:
+    from_sparse_array = 'from_scipy_sparse_matrix'
+    to_sparse_array = 'to_scipy_sparse_matrix'
+# Dynamically import the functions
+module = importlib.import_module('networkx')
+nx.from_scipy_sparse_matrix = getattr(module, from_sparse_array)
+nx.to_scipy_sparse_matrix = getattr(module, to_sparse_array)
+
+
 
 def adjacency2degree(A):
     """ Compute the degree matrix for a give adjacency matrix A"""
