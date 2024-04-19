@@ -45,15 +45,34 @@ def choice_merge_minflowcost(coords,neighbors_BP,BP,edge_flows,alpha=1):
 
 
 
-def choice_merge_tryall(coords,neighbors_BP,BP,edge_flows,alpha=1,):
+def choice_merge_tryall(coords,neighbors_BP,BP,edge_flows,alpha):
     '''try all possible collapse possibilities and take the one that minimizes the cost'''
-
-    D=pairwise_distances(coords[neighbors_BP])
-    flows=np.array([edge_flows[(neighbor,BP)] for neighbor in neighbors_BP])**alpha
-    flows=np.tile(flows,(D.shape[0],1))
-    merging_neighBP=neighbors_BP[np.argmin((D*flows).sum(1))]
+    if len(neighbors_BP)>50:
+        D=pairwise_distances(coords[neighbors_BP])
+        flows=np.array([edge_flows[(neighbor,BP)] for neighbor in neighbors_BP])**alpha
+        flows.repeat(D.shape[0]).reshape((-1, D.shape[0])).T
+        merging_neighBP=neighbors_BP[np.argmin((D*flows).sum(1))]
+        return merging_neighBP
+    else:
+        flows = np.array([edge_flows[(neighbor, BP)] for neighbor in neighbors_BP])
+        return core_merge_tryall_njit_with_dist(coords, neighbors_BP, flows, alpha=alpha)
+@njit
+def compute_pairwise_distances_njit(coords, neighbors_BP):
+    n = len(neighbors_BP)
+    D = np.zeros((n, n))
+    for i in range(n):
+        for j in range(i + 1, n):
+            D[i, j] = np.sqrt(np.sum((coords[neighbors_BP[i]] - coords[neighbors_BP[j]]) ** 2))
+            D[j, i] = D[i, j]
+    return D
+@njit
+def core_merge_tryall_njit_with_dist(coords, neighbors_BP, flows, alpha):
+    D = compute_pairwise_distances_njit(coords, neighbors_BP)
+    if alpha != 1:
+        flows = flows ** alpha
+    flows = flows.repeat(D.shape[0]).reshape((-1, D.shape[0])).T
+    merging_neighBP = neighbors_BP[np.argmin((D * flows).sum(1))]
     return merging_neighBP
-
 
 
 

@@ -3,7 +3,7 @@ import numpy as np
 from numpy import ctypeslib as npct
 import scipy.sparse as sp
 import os
-
+import warnings
 
 file_path = os.path.abspath(__file__)
 # Extract the directory path
@@ -52,6 +52,7 @@ def fast_optimize_general(T, coords_terminals, al, improv_threshold=1e-7,
 	subT = T[:num_terminals][:, :num_terminals]
 	# check terminals are leaves. If one of them is not adapt demands
 	if subT.sum() != 0:
+		warnings.warn('Terminals are not leaves. Demands will be adapted. This may lead to unexpected results. NOT WORKING PROPERLY')
 		T_ = T.tolil(copy=True)
 		T_aux = T.tolil(copy=True)
 		for i, j in subT.nonzero():

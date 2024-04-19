@@ -3,6 +3,15 @@
 This repository includes the code of the experiments conducted in the paper "The Central Spanning Tree" by Enrique 
 Fita Sanmartin, Christoph Schnörr and Fred A. Hamprecht. The paper is available [here](https://arxiv.org/pdf/2404.06447.pdf). 
 
+![Figure 1](./Figures/figures_paper/CST_table.png)
+
+[11]: Gilbert et. al.: Steiner Minimal Trees (1968)
+
+[18]: Kruskal: On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem (1956)
+
+[21]: Masone et. al.: The minimum routing cost tree problem: State of the art and a core-node based heuristic algorithm (2019)
+
+
 ## INSTALLATION
 The code should work for Python>=3.8. To install the required packages, run the following command:
 #### Install the required packages
@@ -115,13 +124,6 @@ $$\underset{T}{\arg \min}\sum_{(i,j)\in E_{T}}\big(m_{ij}(1-m_{ij})\big)^{\alpha
 where $m_{ij}$ and $(1-m_{ij})$ are the normalized cardinalities of the components resulting from the removal of the edge 
 $e=(i,j)$ from $T$. the product $m_e(1-m_e)$ is proportional to the "edge betweeness centrality" of $e$ in $T$.
 
-![Figure 1](./Figures/figures_paper/CST_table.png)
-
-[11]: Gilbert et. al.: Steiner Minimal Trees (1968)
-
-[18]: Kruskal: On the Shortest Spanning Subtree of a Graph and the Traveling Salesman Problem (1956)
-
-[21]: Masone et. al.: The minimum routing cost tree problem: State of the art and a core-node based heuristic algorithm (2019)
 
 ## Evolution (Branched) Central Spanning Tree with respect to α
 
@@ -157,7 +159,8 @@ full topology, which is a tree that contains all input nodes (terminals) as leav
 degree 3. 
 To approximate the solution, we propose a heuristic algorithm called mSTreg, which alternates between two steps:
 - **Geometry update**: It updates the coordinates of the Steiner points. Given a topology, the optimal position of the 
-  coordinates can be computed efficiently.
+  coordinates can be computed efficiently. Code for the geometry update is available has been based on the 
+  optimization of the Steiner points for the Branched Optimal Transport problem, available [here](https://github.com/sciai-lab/BranchedOT).
 - **Topology update**: It updates the topology of the tree. Given the coordinates of the nodes and the optimal Steiner 
   point coordinates of the previous step, it updates the topology of the tree, by computing the minimum spanning 
   tree (mST) over all nodes (Steiner and terminal nodes). The mST is then transformed into a full topology since we 

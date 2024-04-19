@@ -88,7 +88,7 @@ def removeBP(T, coords,order_criterium='closestterminals',merging_criterium='try
 
 
         #add new / update elements queue
-        Q.put(coords=altered_coords,T_dict=T_dict,merging_node=merging_neighBP)
+        Q.put(coords=altered_coords,T_dict=T_dict,merging_node=merging_neighBP,removed_node=BP)
         
 
     

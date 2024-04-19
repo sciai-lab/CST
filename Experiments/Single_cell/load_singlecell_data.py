@@ -145,7 +145,7 @@ def load_setty():
         X_TSNE = np.array(f['X_TSNE'])
         labels = np.array(f['labels']).astype(str)
         colors=np.array(f['colors']).astype(str)
-    return X_RAW, X_PCA, X_TSNE, labels,colors
+    return X_PCA, X_TSNE, labels,colors
 
 def download_Settydata(filepath='setty.h5ad'):
     '''
