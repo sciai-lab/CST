@@ -1,7 +1,7 @@
 # Central Spanning Tree
 
-This repository includes the code of the experiments conducted in the paper "The Central Spanning Tree" by Enrique 
-Fita Sanmartin, Christoph Schnörr and Fred A. Hamprecht. The paper is available [here](https://arxiv.org/pdf/2404.06447.pdf). 
+This repository includes the code of the experiments conducted in the paper "The Central Spanning Tree Problem" by Enrique 
+Fita Sanmartín, Christoph Schnörr and Fred A. Hamprecht. The paper is available [here](https://arxiv.org/pdf/2404.06447.pdf).
 
 ![Figure 1](./Figures/figures_paper/CST_table.png)
 
