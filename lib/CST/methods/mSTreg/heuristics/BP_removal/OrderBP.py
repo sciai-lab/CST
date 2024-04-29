@@ -24,9 +24,9 @@ def get_orderBPcls(order_criterium,T_dict,coords, num_terminals):
     elif order_criterium.lower()== 'furthest':
         return OrderBP4removal_furthest(T_dict,coords,num_terminals)
     elif order_criterium.lower() == 'default':
-        return OrderBP4removal_default(coords, num_terminals)
+        return OrderBP4removal_default(T_dict, num_terminals)
     elif order_criterium.lower() == 'random':
-        return OrderBP4removal_random(coords, num_terminals)
+        return OrderBP4removal_random(T_dict, num_terminals)
     elif order_criterium.lower() == 'closestterminals':
         return OrderBP4removal_closestterminals(T_dict,coords,num_terminals)
     elif order_criterium.lower() == 'lowestdegree':
@@ -195,18 +195,18 @@ class OrderBP4removal_furthest(OrderBP4removal):
                         updated = True
 
 class OrderBP4removal_default(OrderBP4removal):
-    def __init__(self, coords, num_terminals,**kwargs):
+    def __init__(self, T_dict, num_terminals,**kwargs):
         self.n = num_terminals
-
-        self.Q=list(range(num_terminals,len(coords)))
+        
+        self.Q = [BP for BP in T_dict.keys() if BP >= self.n]
 
 
 
 class OrderBP4removal_random(OrderBP4removal):
-    def __init__(self, coords, num_terminals,**kwargs):
+    def __init__(self,T_dict, num_terminals,**kwargs):
         self.n = num_terminals
 
-        self.Q=list(range(num_terminals,len(coords)))
+        self.Q=[BP for BP in T_dict.keys() if BP>=self.n]
         shuffle(self.Q)
 
 
@@ -264,12 +264,12 @@ class OrderBP4removal_lowestdegree(OrderBP4removal):
     def __init__(self, T_dict, num_terminals):
         self.n = num_terminals
         self.Q = pqdict({})
-        BPs_ls = list(range(self.n, len(T_dict)))
+        BPs_ls = list(T_dict.keys())
         shuffle(BPs_ls)
-        for BP in BPs_ls:
-            self.Q[BP] = len(T_dict[BP])
+        for BP in T_dict.keys():
+            if BP>=self.n:
+                self.Q[BP] = len(T_dict[BP])
     
     def put(self, T_dict, merging_node, **kwargs):
-        def put(self, coords, T_dict, merging_node, **kwargs):
-            if merging_node >= self.n:
-                self.Q[merging_node] = len(T_dict[merging_node])
+        if merging_node >= self.n:
+            self.Q[merging_node] = len(T_dict[merging_node])

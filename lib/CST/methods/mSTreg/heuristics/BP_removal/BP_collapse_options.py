@@ -1,8 +1,7 @@
 import numpy as np
 from sklearn.metrics import pairwise_distances
 from numba import njit
-import scipy.sparse  as sp
-from .utils_terminal_side_edge import check_validity_edge_restriction
+
 def choose_merging_neighBP(T_dict, coords, BP,edge_flows, alpha=1, merging_criterium='closest'):
     '''
 
@@ -45,17 +44,20 @@ def choice_merge_minflowcost(coords,neighbors_BP,BP,edge_flows,alpha=1):
 
 
 
-def choice_merge_tryall(coords,neighbors_BP,BP,edge_flows,alpha):
+
+def choice_merge_tryall(coords,neighbors_BP,BP,edge_flows,alpha=1):
     '''try all possible collapse possibilities and take the one that minimizes the cost'''
-    if len(neighbors_BP)>50:
-        D=pairwise_distances(coords[neighbors_BP])
-        flows=np.array([edge_flows[(neighbor,BP)] for neighbor in neighbors_BP])**alpha
-        flows.repeat(D.shape[0]).reshape((-1, D.shape[0])).T
-        merging_neighBP=neighbors_BP[np.argmin((D*flows).sum(1))]
-        return merging_neighBP
+    
+    if len(neighbors_BP) > 100:
+        D = pairwise_distances(coords[neighbors_BP])
+        flows = np.array([edge_flows[(neighbor, BP)] for neighbor in neighbors_BP]) ** alpha
+        flows = flows.repeat(D.shape[0]).reshape((-1, D.shape[0])).T
+        return neighbors_BP[np.argmin((D * flows).sum(1))]
     else:
-        flows = np.array([edge_flows[(neighbor, BP)] for neighbor in neighbors_BP])
-        return core_merge_tryall_njit_with_dist(coords, neighbors_BP, flows, alpha=alpha)
+        D = compute_pairwise_distances_njit(coords, neighbors_BP)
+        flows = np.array([edge_flows[(neighbor, BP)] for neighbor in neighbors_BP]) ** alpha
+        return core_merge_tryall_njit_with_dist(D, neighbors_BP, flows)
+    
 @njit
 def compute_pairwise_distances_njit(coords, neighbors_BP):
     n = len(neighbors_BP)
@@ -65,15 +67,9 @@ def compute_pairwise_distances_njit(coords, neighbors_BP):
             D[i, j] = np.sqrt(np.sum((coords[neighbors_BP[i]] - coords[neighbors_BP[j]]) ** 2))
             D[j, i] = D[i, j]
     return D
+
 @njit
-def core_merge_tryall_njit_with_dist(coords, neighbors_BP, flows, alpha):
-    D = compute_pairwise_distances_njit(coords, neighbors_BP)
-    if alpha != 1:
-        flows = flows ** alpha
+def core_merge_tryall_njit_with_dist(D, neighbors_BP, flows):
     flows = flows.repeat(D.shape[0]).reshape((-1, D.shape[0])).T
     merging_neighBP = neighbors_BP[np.argmin((D * flows).sum(1))]
     return merging_neighBP
-
-
-
-

@@ -43,7 +43,7 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
                  criterium_BP_position_update='median',
                  Compute_CST_each_iter=True, demands=None, init_BP_coords=None, verbose=False,
                  mST_fromknn=True, beta=1,
-                 factor_terminal=1):
+                 factor_terminal=1,collapseBPs_CST=False):
     """
        Compute the BCST  given a topology and terminal coordinates.
 
@@ -70,6 +70,9 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
            param: beta (float): parameter to interpolate linearly between the centralities of the edges and 1:
            (1-beta)+beta*(m_ij*(1-m_ij))**alpha. Default is 1. DO NOT CHANGE. Only for testing purposes. Spoiler: it does not work,
            with beta!=1.
+          param: factor_terminal (float): Factor to multiply the terminal coordinates. Default is 1.
+          param: collapseBPs_CST (bool): If True, when computing the CST topology from the BCST one, it collapses the
+            branching points, which share the same location, before applying any other merging criterion.
 
 
        Returns:
@@ -101,18 +104,10 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
 
     if return_CST and Compute_CST_each_iter:
         # Map the BCST to a CST
-        if num_terminals>=100000:
-            T_dict, filtered_coords, flows_dict = remove_collapsedBP_from_solution(adj=best_topo_BCST, flows=best_EW,
-                                                                                   coords=best_coords,return_Tdict=True)
-            best_topo_CST = removeBP(T=T_dict,edge_flows=flows_dict,num_terminals=num_terminals, coords=filtered_coords,
-                                     order_criterium=order_criterium, merging_criterium=merging_criterium,
-                                     criterium_BP_position_update=criterium_BP_position_update, alpha=alpha,
-                                     )  # removes BP from solution-> tree on original coordinates
-        else:
-            best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
+        best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
                                        order_criterium=order_criterium, merging_criterium=merging_criterium,
                                        criterium_BP_position_update=criterium_BP_position_update, alpha=alpha,
-                                     )  # removes BP from solution-> tree on original coordinates
+                                     collapseBPs_CST=collapseBPs_CST)  # removes BP from solution-> tree on original coordinates
 
         #compute cost of CST
         best_cost_CST = Wiener_index(best_topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
@@ -130,6 +125,8 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
         improv = False
         #apply mST regularization
         newadj = topo_mST_reguralization(coords, adj=topo_BCST, max_freq=maxfreq_mSTreg, mST_fromknn=mST_fromknn)
+        
+        
         topo_BCST, cost_BCST, coords, EW, _ = fast_optimize(newadj, coords_terminals=coords_terminals, al=alpha,
                                                                   demands=demands, init_BP_coords=init_BP_coords, EW=None,
                                                             beta=beta,factor_terminal=factor_terminal)
@@ -141,19 +138,10 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
 
         if return_CST and Compute_CST_each_iter:
             # Map the BCST to a CST
-            if num_terminals >= 100000:
-                T_dict, filtered_coords, flows_dict = remove_collapsedBP_from_solution(adj=topo_BCST, flows=EW,
-                                                                                       coords=coords,return_Tdict=True)
-                topo_CST = removeBP(T=T_dict, edge_flows=flows_dict, num_terminals=num_terminals,
-                                         coords=filtered_coords,
+            topo_CST = removeBP(adj_to_adj_sparse(topo_BCST, flows=EW), coords=coords,
                                       order_criterium=order_criterium, merging_criterium=merging_criterium,
                                       criterium_BP_position_update=criterium_BP_position_update,
-                                    alpha=alpha)
-            else:
-                topo_CST = removeBP(adj_to_adj_sparse(topo_BCST, flows=EW), coords=coords,
-                                      order_criterium=order_criterium, merging_criterium=merging_criterium,
-                                      criterium_BP_position_update=criterium_BP_position_update,
-                                    alpha=alpha)  # removes BP from solution-> tree on original coordinates
+                                    alpha=alpha,collapseBPs_CST=collapseBPs_CST)  # removes BP from solution-> tree on original coordinates
             #compute cost of CST
             cost_CST = Wiener_index(topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
             if best_cost_CST > cost_CST:
@@ -173,19 +161,10 @@ def compute_BCST(topo, alpha, coords_terminals, maxiter_mSTreg=10,
 
     if return_CST:
         if not Compute_CST_each_iter:
-            if num_terminals >= 100000:
-        
-                T_dict,filtered_coords,flows_dict=remove_collapsedBP_from_solution(adj=best_topo_BCST,flows=best_EW,
-                                                                                   coords=best_coords,return_Tdict=True)
-                best_topo_CST = removeBP(T=T_dict,edge_flows=flows_dict,num_terminals=num_terminals, coords=filtered_coords,
-                                         order_criterium=order_criterium, merging_criterium=merging_criterium,
-                                         criterium_BP_position_update=criterium_BP_position_update,
-                                         alpha=alpha)
-            else:
-                best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
+            best_topo_CST = removeBP(adj_to_adj_sparse(best_topo_BCST, flows=best_EW), coords=best_coords,
                                        order_criterium=order_criterium, merging_criterium=merging_criterium,
                                        criterium_BP_position_update=criterium_BP_position_update,
-                                     alpha=alpha)  # removes BP from solution-> tree on original coordinates
+                                     alpha=alpha,collapseBPs_CST=collapseBPs_CST)  # removes BP from solution-> tree on original coordinates
             # compute cost of CST
             best_cost_CST = Wiener_index(best_topo_CST, alpha=alpha) / (num_terminals ** (2 * alpha))
 
@@ -584,6 +563,7 @@ def update_topoBP2binarytopoBP(T, n):
     node_representative[:n] = np.arange(n)  # terminals represent themselves
 
     leaves = np.where(T.astype(bool).sum(1) == 1)[0]  # get leaves
+    # np.random.shuffle(leaves)  # shuffle leaves to start from a random one
     visited = np.zeros(T.shape[0], dtype=bool)
     BP_idx  = n
     break_all = False

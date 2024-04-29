@@ -139,7 +139,8 @@ class T_data():
                      order_criterium = 'closest', merging_criterium = 'tryall',
                      criterium_BP_position_update = 'median', compute_CST_each_iter=True,
                      mST_fromknn=True,filter_BP_from_solution=True,threshold_filter_collapse=1e-5,
-                     beta=1,factor_terminal=1,karger_graph=None,karger_temperature=1):
+                     beta=1,factor_terminal=1,karger_graph=None,karger_temperature=1,
+                     collapseBPs_CST=False):
         '''
 		Compute the BCST (Branched Central Spanning Tree) and CST (Central Spanning Tree) for a given alpha.
 
@@ -190,6 +191,8 @@ class T_data():
             filter_BP_from_solution (bool): If True, filter out branching points that are too close to each other.
                                             Default is True.
             threshold_filter_collapse (float): Threshold for filtering out branching points that are too close to each other.
+            collapseBPs_CST (bool): If True, when computing the CST topology from the BCST one, it collapses the
+            branching points, which share the same location, before applying any other merging criterion.
         Returns:
             The computed BCST and CST if return_topo_CST is True.
         '''
@@ -280,7 +283,8 @@ class T_data():
                                                                                  verbose=self.verbose,
                                                                                  mST_fromknn=mST_fromknn,
                                                                                            beta=beta,
-                                                                               factor_terminal=factor_terminal)
+                                                                               factor_terminal=factor_terminal,
+                                                                                           collapseBPs_CST=collapseBPs_CST)
             # Store CST topology and related information
             if init_CST_cost<CST_cost*scale:
                 self.trees[CST_txt] = Tree(init_topo_CST.tocsr(), coords=None, widths=None, coords_vis=self.X_vis,
