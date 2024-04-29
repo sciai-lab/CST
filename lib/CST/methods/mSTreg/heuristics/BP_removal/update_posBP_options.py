@@ -38,29 +38,24 @@ def update_BPpos_median(coords,T_dict,neigh_BP_merged,num_terminals,edge_flows,a
 
 
     if neigh_BP_merged >= num_terminals:
-        edge_and_flows=np.array([[neigh_BP_merged,v,edge_flows[(neigh_BP_merged,v)] ** alpha] for v in T_dict[neigh_BP_merged]])
-        return median_update(coords,neigh_BP_merged,edge_and_flows[:,:2].astype(int),edge_and_flows[:,2])
+        neigh_and_flows=np.array([[v,edge_flows[(neigh_BP_merged,v)] ** alpha] for v in T_dict[neigh_BP_merged]])
+        return median_update(coords,neigh_BP_merged,neigh_and_flows[:,0].astype(int),neigh_and_flows[:,1])
 
     return coords
 
 @njit
-def median_update(coords: np.ndarray,neigh_BP_merged: int,edges:np.ndarray,flows:np.ndarray):
+def median_update(coords: np.ndarray,neigh_BP_merged: int,neighs:np.ndarray,flows:np.ndarray):
     diff = 1
     while_it = 0
     eps=1e-15
     while diff > 1e-5 and while_it < 500:
         old = coords[neigh_BP_merged]
         # compute new coordinate merged point
-        numerator = np.zeros_like(coords[neigh_BP_merged])
-        denominator = 0
-        for e, f in zip(edges, flows):
-            neigh_clos = e[1] if e[1] != neigh_BP_merged else e[0]
-            sumand_denominator = f / (np.linalg.norm(
-                coords[neigh_clos] - coords[neigh_BP_merged])+eps)
-            numerator += coords[neigh_clos] * sumand_denominator
-            denominator += sumand_denominator
+        sumand_denominator = flows / (np.sqrt(np.sum((coords[neighs] - coords[neigh_BP_merged])**2, axis=1)) + eps)
+        numerator = np.sum(coords[neighs] * sumand_denominator[:, np.newaxis], axis=0)
+        denominator = np.sum(sumand_denominator)
 
-        coords[neigh_BP_merged] = numerator / (denominator)
+        coords[neigh_BP_merged] = numerator / denominator
 
         diff = np.linalg.norm(old - coords[neigh_BP_merged])
         while_it += 1
